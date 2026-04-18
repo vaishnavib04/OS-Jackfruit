@@ -217,8 +217,6 @@ This relates to scheduling goals:
 
 **Results:**
 
-**Results:**
-
 | Container | Nice Value | Completed | Final Accumulator |
 |-----------|------------|-----------|-------------------|
 | hog1 | +10 | Yes (20s) | 2507067954467403714 |
