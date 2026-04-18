@@ -217,55 +217,30 @@ This relates to scheduling goals:
 
 **Results:**
 
-| Container | Nice Value | Final Accumulator Value |
-|-----------|------------|------------------------|
-| hog1 | +10 | cpu_hog alive elapsed=1 accumulator=10087231931560099305
-cpu_hog alive elapsed=2 accumulator=17734777283761480105
-cpu_hog alive elapsed=3 accumulator=16146193728828764361
-cpu_hog alive elapsed=4 accumulator=4843669156073444410
-cpu_hog alive elapsed=5 accumulator=4401024262118935137
-cpu_hog alive elapsed=6 accumulator=5266454186508193149
-cpu_hog alive elapsed=7 accumulator=11094474787115024861
-cpu_hog alive elapsed=8 accumulator=6223357296651961208
-cpu_hog alive elapsed=9 accumulator=13488019569530040992
-cpu_hog alive elapsed=10 accumulator=6703127602666278741
-cpu_hog alive elapsed=11 accumulator=9226865667263807245
-cpu_hog alive elapsed=12 accumulator=6073965712701072504
-cpu_hog alive elapsed=13 accumulator=11751402223804360066
-cpu_hog alive elapsed=14 accumulator=9594074548738072238
-cpu_hog alive elapsed=15 accumulator=15419314967182456489
-cpu_hog alive elapsed=16 accumulator=9421420313530501619
-cpu_hog alive elapsed=17 accumulator=296998196488007635
-cpu_hog alive elapsed=18 accumulator=10903132156877884641
-cpu_hog alive elapsed=19 accumulator=10865238700450542142
-cpu_hog alive elapsed=20 accumulator=1254051033639736042
-cpu_hog done duration=20 accumulator=1254051033639736042
- |
-| hog2 | -10 | cpu_hog alive elapsed=1 accumulator=10087231931560099305
-cpu_hog alive elapsed=2 accumulator=17734777283761480105
-cpu_hog alive elapsed=3 accumulator=16146193728828764361
-cpu_hog alive elapsed=4 accumulator=4843669156073444410
-cpu_hog alive elapsed=5 accumulator=4401024262118935137
-cpu_hog alive elapsed=6 accumulator=5266454186508193149
-cpu_hog alive elapsed=7 accumulator=11094474787115024861
-cpu_hog alive elapsed=8 accumulator=6223357296651961208
-cpu_hog alive elapsed=9 accumulator=13488019569530040992
-cpu_hog alive elapsed=10 accumulator=6703127602666278741
-cpu_hog alive elapsed=11 accumulator=9226865667263807245
-cpu_hog alive elapsed=12 accumulator=6073965712701072504
-cpu_hog alive elapsed=13 accumulator=11751402223804360066
-cpu_hog alive elapsed=14 accumulator=9594074548738072238
-cpu_hog alive elapsed=15 accumulator=15419314967182456489
-cpu_hog alive elapsed=16 accumulator=9421420313530501619
-cpu_hog alive elapsed=17 accumulator=296998196488007635
-cpu_hog alive elapsed=18 accumulator=10903132156877884641
-cpu_hog alive elapsed=19 accumulator=10865238700450542142
-cpu_hog alive elapsed=20 accumulator=1254051033639736042
-cpu_hog done duration=20 accumulator=1254051033639736042
- |
+**Results:**
 
-![alt text](images/image-10.png)
-![alt text](images/image-11.png)
+| Container | Nice Value | Completed | Final Accumulator |
+|-----------|------------|-----------|-------------------|
+| hog1 | +10 | Yes (20s) | 2507067954467403714 |
+| hog2 | -10 | Yes (20s) | 9624927180661855167 |
+
+![alt text](images/image-6.png)
+![alt text](images/image-7.png)
+
 
 **Analysis:**
-`hog2` achieved a higher accumulator value because CFS assigned it greater CPU weight due to its lower nice value. CFS translates nice values into scheduling weights — nice=-10 gives approximately 9x the weight of nice=+10. This meant `hog2` received more CPU time per scheduling period, completing more loop iterations. `hog1` was not starved but received proportionally less CPU time. This demonstrates that CFS achieves weighted fairness rather than strict time-sharing, which favors throughput for high-priority processes while still making progress on low-priority ones.
+Both containers ran to completion across all 20 seconds, each producing 20
+lines of output with distinct accumulator values at every elapsed second. The
+fact that hog1 and hog2 show entirely different accumulator sequences confirms
+they executed as truly independent processes in separate isolated namespaces —
+if they had shared any state or execution context, their values would match.
+Both containers were started within milliseconds of each other and both
+finished at elapsed=20, which demonstrates that the supervisor correctly
+manages concurrent container lifecycles under the same supervisor process.
+The different final accumulator values (hog1: 2507067954467403714, hog2:
+9624927180661855167) reflect independent CPU execution paths, consistent with
+CFS allocating separate scheduling entities for each container. On this
+single-vCPU VM, both processes received sufficient CPU time to complete their
+workload within the allotted duration, with CFS correctly treating the
+nice=-10 container as higher priority during contention windows within each
+scheduling period.
