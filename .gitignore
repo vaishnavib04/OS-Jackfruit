@@ -1,4 +1,28 @@
 solved
+# Ignore root filesystems
+rootfs-base/
+rootfs-alpha/
+rootfs-beta/
+rootfs-*/
+
+# Ignore Alpine tar files
+*.tar.gz
+alpine-minirootfs-3.20.3-x86_64.# Ignore root filesystems
+rootfs-base/
+rootfs-alpha/
+rootfs-beta/
+rootfs-*/
+boilerplate/rootfs/
+
+# Ignore ALL tar.gz files
+*.tar.gz
+*.tar.gz.*
+
+# Build artifacts
+boilerplate/engine
+boilerplate/memory_hog
+boilerplate/cpu_hog
+boilerplate/io_pulsetar.gz.1
 
 # Build artifacts (user-space)
 boilerplate/engine
